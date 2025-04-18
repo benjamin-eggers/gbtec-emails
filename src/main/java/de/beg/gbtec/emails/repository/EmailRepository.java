@@ -1,7 +1,7 @@
 package de.beg.gbtec.emails.repository;
 
-import de.beg.gbtec.emails.model.EmailEntity;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import de.beg.gbtec.emails.repository.dto.EmailEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EmailRepository extends PagingAndSortingRepository<EmailEntity, Long> {
+public interface EmailRepository extends JpaRepository<EmailEntity, Long> {
 }
