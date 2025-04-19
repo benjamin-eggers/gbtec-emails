@@ -1,8 +1,6 @@
 package de.beg.gbtec.emails.http.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.beg.gbtec.emails.model.EmailStatus;
 import de.beg.gbtec.emails.model.Recipient;
 import jakarta.validation.Valid;
@@ -12,10 +10,6 @@ import lombok.Builder;
 import java.util.List;
 
 import static de.beg.gbtec.emails.http.dto.Constants.*;
-import static de.beg.gbtec.emails.http.dto.Constants.API_PROPERTY_BCC;
-import static de.beg.gbtec.emails.http.dto.Constants.API_PROPERTY_BODY;
-import static de.beg.gbtec.emails.http.dto.Constants.API_PROPERTY_STATE;
-import static de.beg.gbtec.emails.http.dto.Constants.API_PROPERTY_SUBJECT;
 
 @Builder
 public record CreateEmailRequest(

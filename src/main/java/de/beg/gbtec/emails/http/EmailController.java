@@ -6,6 +6,7 @@ import de.beg.gbtec.emails.http.dto.BulkResponse;
 import de.beg.gbtec.emails.http.dto.UpdateEmailRequest;
 import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.PagedResponse;
+import de.beg.gbtec.emails.service.BulkRequestHandler;
 import de.beg.gbtec.emails.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -14,14 +15,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/emails")
 public class EmailController {
 
     private final EmailService emailService;
+    private final BulkRequestHandler bulkRequestHandler;
 
-    public EmailController(EmailService emailService) {
+    public EmailController(
+            EmailService emailService,
+            BulkRequestHandler bulkRequestHandler
+    ) {
         this.emailService = emailService;
+        this.bulkRequestHandler = bulkRequestHandler;
     }
 
     @GetMapping
@@ -41,11 +49,12 @@ public class EmailController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<BulkResponse<Integer, Email>> bulkCreateEmails(@RequestBody BulkRequest<CreateEmailRequest> request) {
-        var response = emailService.createEmailBulk(request);
+    public ResponseEntity<BulkResponse<Integer, Email>> bulkCreateEmails(
+            @RequestBody BulkRequest<CreateEmailRequest> request
+    ) {
+        var response = bulkRequestHandler.createEmailBulk(request);
         return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Email> updateEmail(
@@ -55,6 +64,15 @@ public class EmailController {
         Email email = emailService.updateEmail(id, request);
         return ResponseEntity.ok(email);
     }
+
+    @PutMapping("/bulk")
+    public ResponseEntity<BulkResponse<Long, Email>> bulkUpdateEmails(
+            @RequestBody BulkRequest<Map.Entry<Long, UpdateEmailRequest>> request
+    ) {
+        var response = bulkRequestHandler.updateEmailBulk(request);
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmail(
