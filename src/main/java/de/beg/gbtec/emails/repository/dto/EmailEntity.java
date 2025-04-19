@@ -34,15 +34,15 @@ public class EmailEntity {
 
     @Type(JsonType.class)
     @Column(name = "recipient", columnDefinition = "jsonb")
-    private List<RecipientJsonb> to;
+    private List<String> to;
 
     @Type(JsonType.class)
     @Column(name = "cc", columnDefinition = "jsonb")
-    private List<RecipientJsonb> cc;
+    private List<String> cc;
 
     @Type(JsonType.class)
     @Column(name = "bcc", columnDefinition = "jsonb")
-    private List<RecipientJsonb> bcc;
+    private List<String> bcc;
 
     @Column(name = "subject")
     private String subject;

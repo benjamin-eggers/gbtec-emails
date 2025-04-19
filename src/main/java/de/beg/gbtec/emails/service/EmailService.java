@@ -10,9 +10,14 @@ import de.beg.gbtec.emails.model.EmailStatus;
 import de.beg.gbtec.emails.model.PagedResponse;
 import de.beg.gbtec.emails.repository.EmailRepository;
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 import static de.beg.gbtec.emails.converter.EmailConverter.toEmail;
 import static de.beg.gbtec.emails.converter.EmailConverter.toEmailEntity;
@@ -21,9 +26,17 @@ import static de.beg.gbtec.emails.converter.EmailConverter.toEmailEntity;
 public class EmailService {
 
     private final EmailRepository emailRepository;
+    private final Set<String> knownSpamAddresses;
+    private final int knownSpamQueryLimit;
 
-    public EmailService(EmailRepository emailRepository) {
+    public EmailService(
+            EmailRepository emailRepository,
+            @Value("${de.beg.gbtec.emails.known-spam-addresses}") Set<String> knownSpamAddresses,
+            @Value("${de.beg.gbtec.emails.known-spam-query-limit:2}") int knownSpamQueryLimit
+    ) {
         this.emailRepository = emailRepository;
+        this.knownSpamAddresses = knownSpamAddresses;
+        this.knownSpamQueryLimit = knownSpamQueryLimit;
     }
 
     public PagedResponse<Email> getEmails(
@@ -70,5 +83,22 @@ public class EmailService {
 
     public void deleteEmail(Long id) {
 
+    }
+
+    public void markEmailsAsSpam() {
+        knownSpamAddresses.forEach(this::markEmailAsSpam);
+    }
+
+    @SneakyThrows
+    private void markEmailAsSpam(String emailAddress) {
+        Slice<EmailEntity> entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
+        while (!entitySlice.isEmpty() || entitySlice.hasNext()) {
+            entitySlice.forEach(emailEntity -> {
+                        emailEntity.setState(EmailStatus.SPAM);
+                        emailRepository.save(emailEntity);
+                    }
+            );
+            entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
+        }
     }
 }

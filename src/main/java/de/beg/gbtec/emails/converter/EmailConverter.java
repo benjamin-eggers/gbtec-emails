@@ -5,14 +5,11 @@ import de.beg.gbtec.emails.http.dto.UpdateEmailRequest;
 import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.Recipient;
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
-import de.beg.gbtec.emails.repository.dto.RecipientJsonb;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.lang.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
-import static org.apache.commons.lang3.StringUtils.isAllBlank;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 public class EmailConverter {
@@ -43,63 +40,45 @@ public class EmailConverter {
                 .build();
     }
 
-    public static List<Recipient> mapRecipients(
-            List<RecipientJsonb> recipients
+    private static List<Recipient> mapRecipients(
+            List<String> recipients
     ) {
         return recipients.stream()
-                .map(EmailConverter::toRecipient)
+                .map(recipient -> Recipient.builder().email(recipient).build())
                 .toList();
     }
 
-    public static Recipient toRecipient(
-            RecipientJsonb recipientJsonb
-    ) {
-        return Recipient.builder()
-                .niceName(recipientJsonb.getNiceName())
-                .email(recipientJsonb.getEmail())
-                .build();
-    }
 
     public static EmailEntity toEmailEntity(
             CreateEmailRequest request
     ) {
         var entity = new EmailEntity();
         entity.setFrom(trimToNull(request.from()));
-        entity.setTo(toRecipientJsonb(request.to()));
-        entity.setCc(toRecipientJsonb(request.cc()));
-        entity.setBcc(toRecipientJsonb(request.bcc()));
+        entity.setTo(unwrapRecipients(request.to()));
+        entity.setCc(unwrapRecipients(request.cc()));
+        entity.setBcc(unwrapRecipients(request.bcc()));
         entity.setSubject(trimToNull(request.subject()));
         entity.setBody(trimToNull(request.body()));
         entity.setState(request.state());
         return entity;
     }
 
-    public static List<RecipientJsonb> toRecipientJsonb(List<Recipient> recipients) {
+    private static List<String> unwrapRecipients(List<Recipient> recipients) {
         return recipients.stream()
-                .map(EmailConverter::toRecipientJsonb)
-                .filter(Objects::nonNull)
+                .map(Recipient::email)
+                .filter(StringUtils::isNotBlank)
                 .toList();
     }
 
-    @Nullable
-    public static RecipientJsonb toRecipientJsonb(Recipient recipient) {
-        if (isAllBlank(recipient.email(), recipient.niceName())) {
-            return null;
-        }
-        var recipientJsonb = new RecipientJsonb();
-        recipientJsonb.setEmail(trimToNull(recipient.email()));
-        recipientJsonb.setNiceName(trimToNull(recipient.niceName()));
-        return recipientJsonb;
-    }
 
     public static void applyEmailUpdate(
             EmailEntity entity,
             UpdateEmailRequest request
     ) {
         entity.setFrom(trimToNull(request.from()));
-        entity.setTo(toRecipientJsonb(request.to()));
-        entity.setCc(toRecipientJsonb(request.cc()));
-        entity.setBcc(toRecipientJsonb(request.bcc()));
+        entity.setTo(unwrapRecipients(request.to()));
+        entity.setCc(unwrapRecipients(request.cc()));
+        entity.setBcc(unwrapRecipients(request.bcc()));
         entity.setSubject(trimToNull(request.subject()));
         entity.setBody(trimToNull(request.body()));
         entity.setState(request.state());
