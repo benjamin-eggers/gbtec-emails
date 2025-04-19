@@ -21,9 +21,9 @@ public record UpdateEmailRequest(
 ) {
 
     public UpdateEmailRequest {
-        to = to != null ? List.copyOf(to) : List.of();
-        cc = cc != null ? List.copyOf(cc) : List.of();
-        bcc = bcc != null ? List.copyOf(bcc) : List.of();
+        to = to == null ? List.of() : List.copyOf(to);
+        cc = cc == null ? List.of() : List.copyOf(cc);
+        bcc = bcc == null ? List.of() : List.copyOf(bcc);
     }
 
 }

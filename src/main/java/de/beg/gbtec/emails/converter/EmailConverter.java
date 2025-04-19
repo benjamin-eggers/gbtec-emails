@@ -63,7 +63,9 @@ public class EmailConverter {
         return entity;
     }
 
-    private static List<String> unwrapRecipients(List<Recipient> recipients) {
+    private static List<String> unwrapRecipients(
+            List<Recipient> recipients
+    ) {
         return recipients.stream()
                 .map(Recipient::email)
                 .filter(StringUtils::isNotBlank)
