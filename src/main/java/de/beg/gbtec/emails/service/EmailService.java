@@ -3,8 +3,7 @@ package de.beg.gbtec.emails.service;
 import de.beg.gbtec.emails.converter.EmailConverter;
 import de.beg.gbtec.emails.exception.EmailNotFoundException;
 import de.beg.gbtec.emails.exception.UpdateNotAllowedException;
-import de.beg.gbtec.emails.http.dto.CreateEmailRequest;
-import de.beg.gbtec.emails.http.dto.UpdateEmailRequest;
+import de.beg.gbtec.emails.http.dto.*;
 import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.EmailStatus;
 import de.beg.gbtec.emails.model.PagedResponse;
@@ -15,12 +14,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import static de.beg.gbtec.emails.converter.EmailConverter.toEmail;
 import static de.beg.gbtec.emails.converter.EmailConverter.toEmailEntity;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 public class EmailService {
@@ -49,6 +52,23 @@ public class EmailService {
                 .size(pageable.getPageSize())
                 .hasNext(entities.hasNext())
                 .build();
+    }
+
+    public BulkResponse<Integer, Email> createEmailBulk(
+            BulkRequest<CreateEmailRequest> bulkRequest
+    ) {
+        var response = new LinkedHashMap<Integer, BulkResponseEntry<Email>>();
+        for (int i = 0; i < bulkRequest.requests().size(); i++) {
+            var createEmailRequest = bulkRequest.requests().get(i);
+            try {
+                Email email = createEmail(createEmailRequest);
+                response.put(i, new BulkResponseEntry<>(OK, email));
+            } catch (Exception e) {
+                response.put(i, new BulkResponseEntry<>(INTERNAL_SERVER_ERROR, null));
+            }
+        }
+
+        return new BulkResponse<>(response);
     }
 
     public Email createEmail(
@@ -101,4 +121,5 @@ public class EmailService {
             entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
         }
     }
+
 }

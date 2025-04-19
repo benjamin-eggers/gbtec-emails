@@ -1,12 +1,15 @@
 package de.beg.gbtec.emails.http;
 
+import de.beg.gbtec.emails.http.dto.BulkRequest;
 import de.beg.gbtec.emails.http.dto.CreateEmailRequest;
+import de.beg.gbtec.emails.http.dto.BulkResponse;
 import de.beg.gbtec.emails.http.dto.UpdateEmailRequest;
 import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.PagedResponse;
 import de.beg.gbtec.emails.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +39,13 @@ public class EmailController {
         Email email = emailService.createEmail(request);
         return ResponseEntity.ok(email);
     }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<BulkResponse<Integer, Email>> bulkCreateEmails(@RequestBody BulkRequest<CreateEmailRequest> request) {
+        var response = emailService.createEmailBulk(request);
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Email> updateEmail(
