@@ -28,7 +28,7 @@ public class BulkRequestHandler {
             var entry = bulkRequest.requests().get(i);
             try {
                 Email email = emailService.createEmail(entry.data());
-                result.add(BulkSuccess.ok(email));
+                result.add(BulkSuccess.ok(email.id(), email));
             } catch (Exception e) {
                 result.add(BulkError.internalServerError(CREATE_FAILED_MESSAGE));
             }
@@ -45,10 +45,10 @@ public class BulkRequestHandler {
             var entry = bulkRequest.requests().get(i);
             try {
                 Email email = emailService.updateEmail(entry.id(), entry.data());
-                result.add(BulkSuccess.ok(email));
+                result.add(BulkSuccess.ok(entry.id(), email));
 
             } catch (Exception e) {
-                result.add(BulkError.internalServerError(UPDATE_FAILED_MESSAGE));
+                result.add(BulkError.internalServerError(entry.id(), UPDATE_FAILED_MESSAGE));
             }
         }
 
@@ -66,7 +66,7 @@ public class BulkRequestHandler {
                 emailService.deleteEmail(id);
                 result.add(BulkSuccess.ok(id));
             } catch (Exception e) {
-                result.add(BulkError.internalServerError(DELETE_FAILED_MESSAGE));
+                result.add(BulkError.internalServerError(entry.id(), DELETE_FAILED_MESSAGE));
             }
         }
         return BulkResponse.of(result);

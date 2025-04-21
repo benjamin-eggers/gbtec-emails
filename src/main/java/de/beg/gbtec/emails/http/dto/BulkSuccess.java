@@ -1,14 +1,21 @@
 package de.beg.gbtec.emails.http.dto;
 
-import org.springframework.http.HttpStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import static org.springframework.http.HttpStatus.OK;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BulkSuccess<T>(
         int statusCode,
+        Long id,
         T data
 ) implements BulkResponseEntry<T> {
 
+    public static <T> BulkSuccess<T> ok(Long id) {
+        return new BulkSuccess<>(OK.value(), id, null);
+    }
 
-    public static <T> BulkSuccess<T> ok(T data) {
-        return new BulkSuccess<>(HttpStatus.OK.value(), data);
+    public static <T> BulkSuccess<T> ok(Long id, T data) {
+        return new BulkSuccess<>(OK.value(), id, data);
     }
 }
