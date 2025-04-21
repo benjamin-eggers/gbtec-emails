@@ -5,6 +5,7 @@ import de.beg.gbtec.emails.model.EmailStatus;
 import de.beg.gbtec.emails.model.Recipient;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public record CreateEmailRequest(
         @JsonProperty(API_PROPERTY_BCC) List<@Valid Recipient> bcc,
         @JsonProperty(API_PROPERTY_SUBJECT) String subject,
         @JsonProperty(API_PROPERTY_BODY) String body,
-        @JsonProperty(API_PROPERTY_STATE) EmailStatus state
+        @JsonProperty(API_PROPERTY_STATE) @NotNull EmailStatus state
 ) {
 
     public CreateEmailRequest {

@@ -1,14 +1,8 @@
 package de.beg.gbtec.emails.http.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import org.springframework.http.HttpStatus;
+public sealed interface BulkResponseEntry<T>
+        permits BulkSuccess, BulkError {
 
-@Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public record BulkResponseEntry<V>(
-        HttpStatus status,
-        V data,
-        String message
-) {
+    int statusCode();
+
 }

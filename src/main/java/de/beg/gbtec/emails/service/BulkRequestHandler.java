@@ -2,107 +2,74 @@ package de.beg.gbtec.emails.service;
 
 import de.beg.gbtec.emails.http.dto.*;
 import de.beg.gbtec.emails.model.Email;
-import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static org.springframework.http.HttpStatus.*;
+import java.util.LinkedList;
 
 @Service
 public class BulkRequestHandler {
 
+    public static final String UPDATE_FAILED_MESSAGE = "Could not update the email. Please try again later";
+    public static final String CREATE_FAILED_MESSAGE = "Could not store the email. Please try again later";
+    public static final String DELETE_FAILED_MESSAGE = "Could not delete the email. Please try again later";
     private final EmailService emailService;
-    private final Validator validator;
 
     public BulkRequestHandler(
-            EmailService emailService,
-            Validator validator
+            EmailService emailService
     ) {
         this.emailService = emailService;
-        this.validator = validator;
     }
 
-    public BulkResponse<Integer, Email> createEmailBulk(
-            BulkRequest<CreateEmailRequest> bulkRequest
+    public BulkResponse<Email> createEmailBulk(
+            BulkRequest<RequestEntry<CreateEmailRequest>> bulkRequest
     ) {
-        var response = new LinkedHashMap<Integer, BulkResponseEntry<Email>>();
-        for (int i = 0; i < bulkRequest.requests().size(); i++) {
-            var createEmailRequest = bulkRequest.requests().get(i);
-            try {
-                var constraintViolations = validator.validate(createEmailRequest);
-                if (constraintViolations.isEmpty()) {
-                    Email email = emailService.createEmail(createEmailRequest);
-                    response.put(
-                            i,
-                            BulkResponseEntry.<Email>builder()
-                                    .status(OK)
-                                    .data(email)
-                                    .build()
-                    );
-                } else {
-                    response.put(
-                            i,
-                            BulkResponseEntry.<Email>builder()
-                                    .status(BAD_REQUEST)
-                                    .message("Request is not well formed and violates the constraints")
-                                    .build()
-                    );
-                }
-            } catch (Exception e) {
-                response.put(
-                        i,
-                        BulkResponseEntry.<Email>builder()
-                                .status(INTERNAL_SERVER_ERROR)
-                                .message("Could not store the email. Please try again later")
-                                .build()
-                );
-            }
-        }
-
-        return new BulkResponse<>(response);
-    }
-
-    public BulkResponse<Long, Email> updateEmailBulk(
-            BulkRequest<Map.Entry<Long, UpdateEmailRequest>> bulkRequest
-    ) {
-        var response = new LinkedHashMap<Long, BulkResponseEntry<Email>>();
+        var result = new LinkedList<BulkResponseEntry<Email>>();
         for (int i = 0; i < bulkRequest.requests().size(); i++) {
             var entry = bulkRequest.requests().get(i);
-            var emailId = entry.getKey();
-            var updateEmailRequest = entry.getValue();
             try {
-                var constraintViolations = validator.validate(updateEmailRequest);
-                if (constraintViolations.isEmpty()) {
-                    Email email = emailService.updateEmail(emailId, updateEmailRequest);
-                    response.put(
-                            emailId,
-                            BulkResponseEntry.<Email>builder()
-                                    .status(OK)
-                                    .data(email)
-                                    .build()
-                    );
-                } else {
-                    response.put(
-                            emailId,
-                            BulkResponseEntry.<Email>builder()
-                                    .status(BAD_REQUEST)
-                                    .message("Request is not well formed and violates the constraints")
-                                    .build()
-                    );
-                }
+                Email email = emailService.createEmail(entry.data());
+                result.add(BulkSuccess.ok(email));
             } catch (Exception e) {
-                response.put(
-                        emailId,
-                        BulkResponseEntry.<Email>builder()
-                                .status(INTERNAL_SERVER_ERROR)
-                                .message("Could not update the email. Please try again later")
-                                .build()
-                );
+                result.add(BulkError.internalServerError(CREATE_FAILED_MESSAGE));
             }
         }
 
-        return new BulkResponse<>(response);
+        return BulkResponse.of(result);
     }
+
+    public BulkResponse<Email> updateEmailBulk(
+            BulkRequest<IdentifiedRequestEntry<UpdateEmailRequest>> bulkRequest
+    ) {
+        var result = new LinkedList<BulkResponseEntry<Email>>();
+        for (int i = 0; i < bulkRequest.requests().size(); i++) {
+            var entry = bulkRequest.requests().get(i);
+            try {
+                Email email = emailService.updateEmail(entry.id(), entry.data());
+                result.add(BulkSuccess.ok(email));
+
+            } catch (Exception e) {
+                result.add(BulkError.internalServerError(UPDATE_FAILED_MESSAGE));
+            }
+        }
+
+        return BulkResponse.of(result);
+    }
+
+    public BulkResponse<Long> deleteEmailBulk(
+            BulkRequest<IdentifiedRequestEntry<Void>> bulkRequest
+    ) {
+        var result = new LinkedList<BulkResponseEntry<Long>>();
+        for (int i = 0; i < bulkRequest.requests().size(); i++) {
+            var entry = bulkRequest.requests().get(i);
+            Long id = entry.id();
+            try {
+                emailService.deleteEmail(id);
+                result.add(BulkSuccess.ok(id));
+            } catch (Exception e) {
+                result.add(BulkError.internalServerError(DELETE_FAILED_MESSAGE));
+            }
+        }
+        return BulkResponse.of(result);
+    }
+
 }
