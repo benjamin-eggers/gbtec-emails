@@ -1,14 +1,11 @@
 package de.beg.gbtec.emails.repository;
 
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface EmailRepository extends JpaRepository<EmailEntity, Long> {
-
-    Slice<EmailEntity> findAllSliced(Pageable pageable);
 
     @Query(
             value = """

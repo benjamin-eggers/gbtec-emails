@@ -29,7 +29,7 @@ public class BulkRequestHandler {
         for (RequestEntry<CreateEmailRequest> entry : bulkRequest.requests()) {
             try {
                 Email email = emailService.createEmail(entry.data());
-                result.add(BulkSuccess.ok(email.id(), email));
+                result.add(BulkSuccess.created(email.id(), email));
             } catch (Exception e) {
                 result.add(BulkError.internalServerError(CREATE_FAILED_MESSAGE));
             }

@@ -7,10 +7,14 @@ import de.beg.gbtec.emails.service.BulkRequestHandler;
 import de.beg.gbtec.emails.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("/emails")
@@ -29,7 +33,7 @@ public class EmailController {
 
     @GetMapping
     public ResponseEntity<PagedResponse<Email>> getEmails(
-            @NonNull Pageable pageable
+            @NonNull @PageableDefault(sort = "id", direction = DESC) Pageable pageable
     ) {
         PagedResponse<Email> emails = emailService.getEmails(pageable);
         return ResponseEntity.ok(emails);
@@ -40,7 +44,7 @@ public class EmailController {
             @Valid @RequestBody CreateEmailRequest request
     ) {
         Email email = emailService.createEmail(request);
-        return ResponseEntity.ok(email);
+        return ResponseEntity.status(CREATED).body(email);
     }
 
     @PostMapping("/bulk")

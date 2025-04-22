@@ -40,7 +40,7 @@ public class EmailService {
     public PagedResponse<Email> getEmails(
             Pageable pageable
     ) {
-        Slice<EmailEntity> entities = emailRepository.findAllSliced(pageable);
+        Slice<EmailEntity> entities = emailRepository.findAll(pageable);
         return PagedResponse.<Email>builder()
                 .entries(toEmails(entities.getContent()))
                 .page(pageable.getPageNumber())
