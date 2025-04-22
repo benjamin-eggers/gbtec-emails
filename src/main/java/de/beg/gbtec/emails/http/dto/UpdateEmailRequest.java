@@ -6,11 +6,13 @@ import de.beg.gbtec.emails.model.Recipient;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 import java.util.List;
 
 import static de.beg.gbtec.emails.http.dto.Constants.*;
 
+@Builder
 public record UpdateEmailRequest(
         @JsonProperty(API_PROPERTY_FROM) @Email String from,
         @JsonProperty(API_PROPERTY_TO) List<@Valid Recipient> to,

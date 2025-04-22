@@ -49,6 +49,12 @@ public class EmailService {
                 .build();
     }
 
+    public Email getEmailById(Long id) {
+        return emailRepository.findById(id)
+                .map(EmailConverter::toEmail)
+                .orElseThrow(EmailNotFoundException::new);
+    }
+
     public Email createEmail(
             CreateEmailRequest request
     ) {

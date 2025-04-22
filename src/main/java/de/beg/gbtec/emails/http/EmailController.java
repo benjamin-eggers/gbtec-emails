@@ -39,6 +39,14 @@ public class EmailController {
         return ResponseEntity.ok(emails);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Email> getEmailById(
+            @PathVariable Long id
+    ) {
+        Email email = emailService.getEmailById(id);
+        return ResponseEntity.ok(email);
+    }
+
     @PostMapping
     public ResponseEntity<Email> createEmail(
             @Valid @RequestBody CreateEmailRequest request

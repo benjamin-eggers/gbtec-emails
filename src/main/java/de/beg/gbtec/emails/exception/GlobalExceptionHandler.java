@@ -3,7 +3,6 @@ package de.beg.gbtec.emails.exception;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,8 +23,7 @@ public class GlobalExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(UpdateNotAllowedException.class)
-    public ResponseEntity<Problem> handleException(
-            UpdateNotAllowedException ex,
+    public ResponseEntity<Problem> handleUpdateNotAllowedException(
             HttpServletRequest request
     ) {
         var problem = Problem.builder()
@@ -40,6 +38,22 @@ public class GlobalExceptionHandler {
                 .body(problem);
     }
 
+    @ExceptionHandler(EmailNotFoundException.class)
+    public ResponseEntity<Problem> handleEmailNotFoundException(
+            HttpServletRequest request
+    ) {
+        var problem = Problem.builder()
+                .title("Not found")
+                .message("Email with the given id does not exist")
+                .status(NOT_FOUND)
+                .location(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(problem);
+    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<Problem> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e,
@@ -48,7 +62,8 @@ public class GlobalExceptionHandler {
         var validationErrors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError -> Map.entry(fieldError.getField(), fieldError.getDefaultMessage()))
+                .filter(fieldError -> fieldError.getCode() != null)
+                .map(fieldError -> Map.entry(fieldError.getField(), fieldError.getCode()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var problem = Problem.builder()
@@ -68,7 +83,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        int exceptionHashCode = HashCodeBuilder.reflectionHashCode(ex);
+        int exceptionHashCode = ex.hashCode();
         log.error("[{}] Unexpected error occurred", exceptionHashCode, ex);
 
         var problem = Problem.builder()
