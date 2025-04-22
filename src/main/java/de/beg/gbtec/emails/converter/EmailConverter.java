@@ -6,7 +6,6 @@ import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.Recipient;
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class EmailConverter {
     }
 
     public static List<Email> toEmails(
-            Page<EmailEntity> entities
+            List<EmailEntity> entities
     ) {
         return entities.stream()
                 .map(EmailConverter::toEmail)

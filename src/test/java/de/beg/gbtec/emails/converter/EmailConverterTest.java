@@ -7,8 +7,6 @@ import de.beg.gbtec.emails.model.EmailStatus;
 import de.beg.gbtec.emails.model.Recipient;
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,10 +24,10 @@ class EmailConverterTest {
         EmailEntity entity2 = createEmailEntity(2L, "sender2@example.com", List.of("recipient2@example.com"),
                 List.of("cc2@example.com"), List.of("bcc2@example.com"), "Subject 2", "Body 2", EmailStatus.SENT);
 
-        Page<EmailEntity> page = new PageImpl<>(List.of(entity1, entity2));
+        List<EmailEntity> list = List.of(entity1, entity2);
 
         // When
-        List<Email> emails = EmailConverter.toEmails(page);
+        List<Email> emails = EmailConverter.toEmails(list);
 
         // Then
         assertThat(emails).hasSize(2);
@@ -63,11 +61,8 @@ class EmailConverterTest {
 
     @Test
     void toEmails_shouldHandleEmptyPage() {
-        // Given
-        Page<EmailEntity> emptyPage = new PageImpl<>(Collections.emptyList());
-
         // When
-        List<Email> emails = EmailConverter.toEmails(emptyPage);
+        List<Email> emails = EmailConverter.toEmails(Collections.emptyList());
 
         // Then
         assertThat(emails).isEmpty();
@@ -401,8 +396,16 @@ class EmailConverterTest {
         assertThat(spamEntity.getState()).isEqualTo(EmailStatus.SPAM);
     }
 
-    private EmailEntity createEmailEntity(Long id, String from, List<String> to, List<String> cc, List<String> bcc,
-                                          String subject, String body, EmailStatus state) {
+    private EmailEntity createEmailEntity(
+            Long id,
+            String from,
+            List<String> to,
+            List<String> cc,
+            List<String> bcc,
+            String subject,
+            String body,
+            EmailStatus state
+    ) {
         var entity = new EmailEntity();
         entity.setId(id);
         entity.setFrom(from);

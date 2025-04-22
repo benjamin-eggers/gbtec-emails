@@ -17,4 +17,8 @@ public record BulkError<T>(
     public static <T> BulkError<T> internalServerError(Long id, String message) {
         return new BulkError<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), id, message);
     }
+
+    public static <T> BulkResponseEntry<T> notFound(Long id, String message) {
+        return new BulkError<>(HttpStatus.NOT_FOUND.value(), id, message);
+    }
 }

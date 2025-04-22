@@ -11,7 +11,6 @@ import de.beg.gbtec.emails.model.PagedResponse;
 import de.beg.gbtec.emails.repository.EmailRepository;
 import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 import static de.beg.gbtec.emails.converter.EmailConverter.*;
-import static de.beg.gbtec.emails.converter.EmailConverter.applyEmailUpdate;
+import static de.beg.gbtec.emails.model.EmailStatus.DELETED;
 
 @Service
 public class EmailService {
@@ -41,9 +40,9 @@ public class EmailService {
     public PagedResponse<Email> getEmails(
             Pageable pageable
     ) {
-        Page<EmailEntity> entities = emailRepository.findAll(pageable);
+        Slice<EmailEntity> entities = emailRepository.findAllSliced(pageable);
         return PagedResponse.<Email>builder()
-                .entries(toEmails(entities))
+                .entries(toEmails(entities.getContent()))
                 .page(pageable.getPageNumber())
                 .size(pageable.getPageSize())
                 .hasNext(entities.hasNext())
@@ -75,7 +74,10 @@ public class EmailService {
     public void deleteEmail(
             Long id
     ) {
-
+        EmailEntity emailEntity = emailRepository.findById(id)
+                .orElseThrow(EmailNotFoundException::new);
+        emailEntity.setState(DELETED);
+        emailRepository.save(emailEntity);
     }
 
     public void markEmailsAsSpam() {

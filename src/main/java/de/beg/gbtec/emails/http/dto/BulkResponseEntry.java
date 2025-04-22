@@ -5,6 +5,7 @@ public sealed interface BulkResponseEntry<T>
 
     Long id();
 
+    @SuppressWarnings("unused")
     int statusCode();
 
 }

@@ -1,10 +1,11 @@
 package de.beg.gbtec.emails.service;
 
+import de.beg.gbtec.emails.exception.EmailNotFoundException;
 import de.beg.gbtec.emails.http.dto.*;
 import de.beg.gbtec.emails.model.Email;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 @Service
 public class BulkRequestHandler {
@@ -12,6 +13,7 @@ public class BulkRequestHandler {
     public static final String UPDATE_FAILED_MESSAGE = "Could not update the email. Please try again later";
     public static final String CREATE_FAILED_MESSAGE = "Could not store the email. Please try again later";
     public static final String DELETE_FAILED_MESSAGE = "Could not delete the email. Please try again later";
+    public static final String NOT_FOUND_MESSAGE = "Email does not exist";
     private final EmailService emailService;
 
     public BulkRequestHandler(
@@ -23,9 +25,8 @@ public class BulkRequestHandler {
     public BulkResponse<Email> createEmailBulk(
             BulkRequest<RequestEntry<CreateEmailRequest>> bulkRequest
     ) {
-        var result = new LinkedList<BulkResponseEntry<Email>>();
-        for (int i = 0; i < bulkRequest.requests().size(); i++) {
-            var entry = bulkRequest.requests().get(i);
+        var result = new ArrayList<BulkResponseEntry<Email>>();
+        for (RequestEntry<CreateEmailRequest> entry : bulkRequest.requests()) {
             try {
                 Email email = emailService.createEmail(entry.data());
                 result.add(BulkSuccess.ok(email.id(), email));
@@ -40,15 +41,16 @@ public class BulkRequestHandler {
     public BulkResponse<Email> updateEmailBulk(
             BulkRequest<IdentifiedRequestEntry<UpdateEmailRequest>> bulkRequest
     ) {
-        var result = new LinkedList<BulkResponseEntry<Email>>();
-        for (int i = 0; i < bulkRequest.requests().size(); i++) {
-            var entry = bulkRequest.requests().get(i);
+        var result = new ArrayList<BulkResponseEntry<Email>>();
+        for (IdentifiedRequestEntry<UpdateEmailRequest> entry : bulkRequest.requests()) {
+            Long emailId = entry.id();
             try {
-                Email email = emailService.updateEmail(entry.id(), entry.data());
-                result.add(BulkSuccess.ok(entry.id(), email));
-
+                Email email = emailService.updateEmail(emailId, entry.data());
+                result.add(BulkSuccess.ok(emailId, email));
+            } catch (EmailNotFoundException e) {
+                result.add(BulkError.notFound(emailId, NOT_FOUND_MESSAGE));
             } catch (Exception e) {
-                result.add(BulkError.internalServerError(entry.id(), UPDATE_FAILED_MESSAGE));
+                result.add(BulkError.internalServerError(emailId, UPDATE_FAILED_MESSAGE));
             }
         }
 
@@ -58,17 +60,19 @@ public class BulkRequestHandler {
     public BulkResponse<Long> deleteEmailBulk(
             BulkRequest<IdentifiedRequestEntry<Void>> bulkRequest
     ) {
-        var result = new LinkedList<BulkResponseEntry<Long>>();
-        for (int i = 0; i < bulkRequest.requests().size(); i++) {
-            var entry = bulkRequest.requests().get(i);
-            Long id = entry.id();
+        var result = new ArrayList<BulkResponseEntry<Long>>();
+        for (IdentifiedRequestEntry<Void> entry : bulkRequest.requests()) {
+            Long emailId = entry.id();
             try {
-                emailService.deleteEmail(id);
-                result.add(BulkSuccess.ok(id));
+                emailService.deleteEmail(emailId);
+                result.add(BulkSuccess.ok(emailId));
+            } catch (EmailNotFoundException e) {
+                result.add(BulkError.notFound(emailId, NOT_FOUND_MESSAGE));
             } catch (Exception e) {
-                result.add(BulkError.internalServerError(entry.id(), DELETE_FAILED_MESSAGE));
+                result.add(BulkError.internalServerError(emailId, DELETE_FAILED_MESSAGE));
             }
         }
+
         return BulkResponse.of(result);
     }
 

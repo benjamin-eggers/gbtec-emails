@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface EmailRepository extends JpaRepository<EmailEntity, Long> {
 
+    Slice<EmailEntity> findAllSliced(Pageable pageable);
+
     @Query(
             value = """
                     SELECT *
