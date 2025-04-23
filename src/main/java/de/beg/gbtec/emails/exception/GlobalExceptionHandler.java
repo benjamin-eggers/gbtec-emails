@@ -80,11 +80,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Problem> handleException(
-            Exception ex,
+            Exception e,
             HttpServletRequest request
     ) {
-        int exceptionHashCode = ex.hashCode();
-        log.error("[{}] Unexpected error occurred", exceptionHashCode, ex);
+        int exceptionHashCode = e.hashCode();
+        log.error("[{}] Unexpected error occurred", exceptionHashCode, e);
 
         var problem = Problem.builder()
                 .title("Internal Server Error")
