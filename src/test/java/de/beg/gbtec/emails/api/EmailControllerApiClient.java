@@ -29,7 +29,7 @@ public class EmailControllerApiClient {
     }
 
     public ValidatableResponse updateEmail(
-            Long id,
+            long id,
             UpdateEmailRequest request
     ) {
         return given()
@@ -41,4 +41,11 @@ public class EmailControllerApiClient {
     }
 
 
+    public ValidatableResponse deleteEmail(long id) {
+        return given()
+                .contentType(ContentType.JSON)
+                .when()
+                .delete("/emails/{id}", id)
+                .then();
+    }
 }

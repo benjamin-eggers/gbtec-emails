@@ -8,6 +8,7 @@ import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.PagedResponse;
 import de.beg.gbtec.emails.model.Recipient;
 import de.beg.gbtec.emails.repository.EmailRepository;
+import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,9 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static de.beg.gbtec.emails.EmailEntityBuilder.anEmailEntity;
 import static de.beg.gbtec.emails.RandomFactory.*;
-import static de.beg.gbtec.emails.model.EmailStatus.DRAFT;
-import static de.beg.gbtec.emails.model.EmailStatus.SENT;
+import static de.beg.gbtec.emails.model.EmailStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.*;
 
@@ -106,6 +107,13 @@ class EmailControllerTest extends AbstractIntegrationTest {
         assertThat(responseBody.state()).isEqualTo(DRAFT);
     }
 
+    @ParameterizedTest
+    @MethodSource("getInvalidCreateEmailRequests")
+    void createEmail_shouldReturnBadRequestDueToValidationErrors(CreateEmailRequest request) {
+        apiClient.createEmail(request)
+                .statusCode(BAD_REQUEST.value());
+    }
+
     @Test
     void updateEmail_shouldUpdateEmail() {
         var from = randomEmail();
@@ -164,11 +172,60 @@ class EmailControllerTest extends AbstractIntegrationTest {
         assertThat(updatedEmail.state()).isEqualTo(SENT);
     }
 
+    @Test
+    void updateEmail_shouldReturnNotFoundIfEmailDoesNotExist() {
+        // In this case, the ID doesn't matter as the table is cleared before each test anyway
+        apiClient.updateEmail(1_000_000_000L, UpdateEmailRequest.builder()
+                        .from(randomEmail())
+                        .state(SENT)
+                        .build()
+                )
+                .statusCode(NOT_FOUND.value());
+    }
+
+    @Test
+    void updateEmail_shouldReturnForbiddenIfEmailIsNotDraft() {
+        EmailEntity savedEmail = emailRepository.save(
+                anEmailEntity()
+                        .from(randomEmail())
+                        .state(SENT)
+                        .build()
+        );
+
+        apiClient.updateEmail(
+                        savedEmail.getId(),
+                        UpdateEmailRequest.builder()
+                                .from(randomEmail())
+                                .to(toRecipients(randomEmail()))
+                                .subject(randomQuote())
+                                .state(SENT)
+                                .build()
+                )
+                .statusCode(FORBIDDEN.value());
+    }
+
     @ParameterizedTest
-    @MethodSource("getFailingCreateEmailRequests")
-    void createEmail_shouldReturnBadRequestDueToValidationErrors(CreateEmailRequest request) {
-        apiClient.createEmail(request)
+    @MethodSource("getInvalidUpdateEmailRequests")
+    void updateEmail_shouldReturnBadRequestDueToValidationErrors(UpdateEmailRequest request) {
+        // In this case, it doesn't matter whether we have an email stored as the validation must fail before it is even relevant
+        apiClient.updateEmail(1L, request)
                 .statusCode(BAD_REQUEST.value());
+    }
+
+    @Test
+    void deleteEmail_shouldDeleteEmail() {
+        var savedEmail = emailRepository.save(
+                anEmailEntity()
+                        .from(randomEmail())
+                        .subject(randomQuote())
+                        .state(DRAFT)
+                        .build()
+        );
+        apiClient.deleteEmail(savedEmail.getId())
+                .statusCode(OK.value());
+
+        var deletedEmail = emailRepository.findById(savedEmail.getId()).orElseThrow();
+        assertThat(deletedEmail.getState()).isEqualTo(DELETED);
     }
 
     private static List<Recipient> toRecipients(String... emails) {
@@ -180,7 +237,33 @@ class EmailControllerTest extends AbstractIntegrationTest {
                 ).toList();
     }
 
-    public static Stream<Arguments> getFailingCreateEmailRequests() {
+    public static Stream<Arguments> getInvalidUpdateEmailRequests() {
+        var gibberish = "cheese & wine";
+        return Stream.of(
+                // Failing because no STATE is given
+                Arguments.of(
+                        UpdateEmailRequest.builder().build()
+                ),
+                // Failing because of an invalid 'from' email address
+                Arguments.of(
+                        UpdateEmailRequest.builder().from(gibberish).state(SENT).build()
+                ),
+                // Failing because of an invalid 'to' email address
+                Arguments.of(
+                        UpdateEmailRequest.builder().to(toRecipients(gibberish)).state(SENT).build()
+                ),
+                // Failing because of an invalid 'cc' email address
+                Arguments.of(
+                        UpdateEmailRequest.builder().cc(toRecipients(gibberish)).state(SENT).build()
+                ),
+                // Failing because of an invalid 'bcc' email address
+                Arguments.of(
+                        UpdateEmailRequest.builder().bcc(toRecipients(gibberish)).state(SENT).build()
+                )
+        );
+    }
+
+    public static Stream<Arguments> getInvalidCreateEmailRequests() {
         var gibberish = "cheese & wine";
         return Stream.of(
                 // Failing because no STATE is given
