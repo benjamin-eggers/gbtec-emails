@@ -8,6 +8,7 @@ import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
@@ -42,7 +43,9 @@ public class EmailConverter {
     private static List<Recipient> mapRecipients(
             List<String> recipients
     ) {
-        return recipients.stream()
+        return Optional.ofNullable(recipients)
+                .orElseGet(List::of)
+                .stream()
                 .map(recipient -> Recipient.builder().email(recipient).build())
                 .toList();
     }

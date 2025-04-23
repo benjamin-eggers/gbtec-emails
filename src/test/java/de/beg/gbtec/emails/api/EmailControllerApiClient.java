@@ -17,6 +17,14 @@ public class EmailControllerApiClient {
                 .then();
     }
 
+    public ValidatableResponse getEmail(Long id) {
+        return given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/emails/{id}", id)
+                .then();
+    }
+
     public ValidatableResponse createEmail(
             CreateEmailRequest request
     ) {
@@ -48,4 +56,5 @@ public class EmailControllerApiClient {
                 .delete("/emails/{id}", id)
                 .then();
     }
+
 }

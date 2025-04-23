@@ -8,7 +8,6 @@ import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.PagedResponse;
 import de.beg.gbtec.emails.model.Recipient;
 import de.beg.gbtec.emails.repository.EmailRepository;
-import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.*;
 
 class EmailControllerTest extends AbstractIntegrationTest {
+
+    public static final long NOT_EXISTING_ID = 1_000_000_000;
 
     @Autowired
     private EmailControllerApiClient apiClient;
@@ -60,6 +61,53 @@ class EmailControllerTest extends AbstractIntegrationTest {
         assertThat(emailPagedResponse.page()).isEqualTo(0);
         assertThat(emailPagedResponse.size()).isStrictlyBetween(0L, maxPageSize);
         assertThat(emailPagedResponse.hasNext()).isFalse();
+    }
+
+    @Test
+    void getEmail_shouldReturnNotFoundIfEmailDoesNotExist() {
+        apiClient.getEmail(NOT_EXISTING_ID)
+                .statusCode(NOT_FOUND.value());
+    }
+
+    @Test
+    void getEmail_shouldReturnEmailForId() {
+        var from = randomEmail();
+        var firstRecipient = randomEmail();
+        var secondRecipient = randomEmail();
+        var cc = randomEmail();
+        var subject = randomQuote();
+        var body = randomQuote();
+        var state = SENT;
+
+        var savedEmail = emailRepository.save(
+                anEmailEntity()
+                        .from(from)
+                        .to(List.of(firstRecipient, secondRecipient))
+                        .cc(List.of(cc))
+                        .subject(subject)
+                        .body(body)
+                        .state(state)
+                        .build()
+        );
+
+        var email = apiClient.getEmail(savedEmail.getId())
+                .statusCode(OK.value())
+                .extract()
+                .body()
+                .as(Email.class);
+
+        assertThat(email).isNotNull();
+        assertThat(email.id()).isEqualTo(savedEmail.getId());
+        assertThat(email.from()).isEqualTo(from);
+        assertThat(email.to())
+                .map(Recipient::email)
+                .containsExactly(firstRecipient, secondRecipient);
+        assertThat(email.cc())
+                .map(Recipient::email)
+                .containsExactly(cc);
+        assertThat(email.subject()).isEqualTo(subject);
+        assertThat(email.body()).isEqualTo(body);
+        assertThat(email.state()).isEqualTo(state);
     }
 
     @Test
@@ -175,7 +223,7 @@ class EmailControllerTest extends AbstractIntegrationTest {
     @Test
     void updateEmail_shouldReturnNotFoundIfEmailDoesNotExist() {
         // In this case, the ID doesn't matter as the table is cleared before each test anyway
-        apiClient.updateEmail(1_000_000_000L, UpdateEmailRequest.builder()
+        apiClient.updateEmail(NOT_EXISTING_ID, UpdateEmailRequest.builder()
                         .from(randomEmail())
                         .state(SENT)
                         .build()
@@ -185,7 +233,7 @@ class EmailControllerTest extends AbstractIntegrationTest {
 
     @Test
     void updateEmail_shouldReturnForbiddenIfEmailIsNotDraft() {
-        EmailEntity savedEmail = emailRepository.save(
+        var savedEmail = emailRepository.save(
                 anEmailEntity()
                         .from(randomEmail())
                         .state(SENT)
@@ -213,7 +261,7 @@ class EmailControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void deleteEmail_shouldDeleteEmail() {
+    void deleteEmail_shouldMarkEmailAsDeleted() {
         var savedEmail = emailRepository.save(
                 anEmailEntity()
                         .from(randomEmail())
@@ -226,6 +274,12 @@ class EmailControllerTest extends AbstractIntegrationTest {
 
         var deletedEmail = emailRepository.findById(savedEmail.getId()).orElseThrow();
         assertThat(deletedEmail.getState()).isEqualTo(DELETED);
+    }
+
+    @Test
+    void deleteEmail_shouldReturnNotFoundIfEmailDoesNotExist() {
+        apiClient.deleteEmail(NOT_EXISTING_ID)
+                .statusCode(NOT_FOUND.value());
     }
 
     private static List<Recipient> toRecipients(String... emails) {
