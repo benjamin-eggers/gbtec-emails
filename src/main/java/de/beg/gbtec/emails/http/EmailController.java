@@ -20,8 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import static de.beg.gbtec.emails.util.SwaggerExamples.BULK_CREATE_RESPONSE_EXAMPLE;
-import static de.beg.gbtec.emails.util.SwaggerExamples.PROBLEM_EXAMPLE;
+import static de.beg.gbtec.emails.util.SwaggerExamples.*;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.MULTI_STATUS;
@@ -92,10 +91,10 @@ public class EmailController {
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = Email.class)
+                                            schema = @Schema(implementation = Email.class),
+                                            examples = @ExampleObject(value = EMAIL_EXAMPLE)
                                     ),
                             }
-
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -103,7 +102,8 @@ public class EmailController {
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = Problem.class)
+                                            schema = @Schema(implementation = Problem.class),
+                                            examples = @ExampleObject(value = PROBLEM_EXAMPLE)
                                     ),
                             }
                     ),
@@ -113,7 +113,8 @@ public class EmailController {
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = Problem.class)
+                                            schema = @Schema(implementation = Problem.class),
+                                            examples = @ExampleObject(value = PROBLEM_EXAMPLE)
                                     ),
                             }
                     ),

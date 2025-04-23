@@ -90,17 +90,21 @@ public class EmailService {
         knownSpamAddresses.forEach(this::markEmailsAsSpam);
     }
 
-    private void markEmailsAsSpam(
+    void markEmailsAsSpam(
             String emailAddress
     ) {
         Slice<EmailEntity> entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
-        while (!entitySlice.isEmpty() || entitySlice.hasNext()) {
+        while (!entitySlice.isEmpty()) {
             entitySlice.forEach(emailEntity -> {
                         emailEntity.setState(EmailStatus.SPAM);
                         emailRepository.save(emailEntity);
                     }
             );
-            entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
+            if (entitySlice.hasNext()) {
+                entitySlice = emailRepository.findEmailEntitiesContainingAddress(emailAddress, knownSpamQueryLimit);
+            } else {
+                return;
+            }
         }
     }
 

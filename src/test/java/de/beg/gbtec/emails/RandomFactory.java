@@ -18,9 +18,8 @@ public class RandomFactory {
         return FAKER.text().text();
     }
 
-    public static void main(String[] args) {
-        System.out.println(randomQuote());
-        System.out.println(randomText());
+    public static Long randomLong() {
+        return FAKER.number().randomNumber();
     }
 
 }

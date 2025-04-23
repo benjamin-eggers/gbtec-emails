@@ -6,6 +6,7 @@ import de.beg.gbtec.emails.repository.dto.EmailEntity;
 import java.util.List;
 
 public final class EmailEntityBuilder {
+    private Long id;
     private String from;
     private List<String> to;
     private List<String> cc;
@@ -19,6 +20,11 @@ public final class EmailEntityBuilder {
 
     public static EmailEntityBuilder anEmailEntity() {
         return new EmailEntityBuilder();
+    }
+
+    public EmailEntityBuilder id(Long id) {
+        this.id = id;
+        return this;
     }
 
     public EmailEntityBuilder from(String from) {
@@ -58,6 +64,7 @@ public final class EmailEntityBuilder {
 
     public EmailEntity build() {
         var emailEntity = new EmailEntity();
+        emailEntity.setId(id);
         emailEntity.setFrom(from);
         emailEntity.setTo(to);
         emailEntity.setCc(cc);
