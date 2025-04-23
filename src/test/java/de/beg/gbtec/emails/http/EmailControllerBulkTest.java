@@ -2,12 +2,10 @@ package de.beg.gbtec.emails.http;
 
 import de.beg.gbtec.emails.AbstractIntegrationTest;
 import de.beg.gbtec.emails.api.EmailControllerApiClient;
-import de.beg.gbtec.emails.http.dto.BulkRequest;
-import de.beg.gbtec.emails.http.dto.BulkResponse;
-import de.beg.gbtec.emails.http.dto.CreateEmailRequest;
-import de.beg.gbtec.emails.http.dto.RequestEntry;
+import de.beg.gbtec.emails.http.dto.*;
 import de.beg.gbtec.emails.model.Email;
 import de.beg.gbtec.emails.model.Recipient;
+import de.beg.gbtec.emails.repository.EmailRepository;
 import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static de.beg.gbtec.emails.EmailEntityBuilder.anEmailEntity;
 import static de.beg.gbtec.emails.RandomFactory.*;
+import static de.beg.gbtec.emails.model.EmailStatus.DELETED;
 import static de.beg.gbtec.emails.model.EmailStatus.DRAFT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.*;
@@ -24,6 +24,8 @@ public class EmailControllerBulkTest extends AbstractIntegrationTest {
 
     @Autowired
     private EmailControllerApiClient apiClient;
+    @Autowired
+    private EmailRepository emailRepository;
 
     @Test
     void bulkCreateEmails_shouldReturnSuccessfulForEmptyRequest() {
@@ -88,6 +90,41 @@ public class EmailControllerBulkTest extends AbstractIntegrationTest {
         var lastBulkResponseEntry = response.results().getLast();
         assertThat(lastBulkResponseEntry.status()).isEqualTo(CREATED.value());
         assertCreatedEmail(lastBulkResponseEntry.data(), secondValidRequest);
+    }
+
+    @Test
+    void bulkDeleteEmails_shouldReturnSuccessfulForRequests() {
+        var firstEmail = emailRepository.save(anEmailEntity().state(DRAFT).build());
+        var secondEmail = emailRepository.save(anEmailEntity().state(DRAFT).build());
+
+        var bulkRequest = new BulkRequest<>(
+                List.of(
+                        IdentifiedRequestEntry.<Void>of(firstEmail.getId(), null),
+                        IdentifiedRequestEntry.<Void>of(secondEmail.getId(), null),
+                        IdentifiedRequestEntry.<Void>of(1_000_000_000L, null)
+                )
+        );
+        var response = apiClient.deleteEmailsBulk(bulkRequest)
+                .statusCode(MULTI_STATUS.value())
+                .extract()
+                .body()
+                .as(new TypeRef<BulkResponse<Email>>() {
+                });
+
+        assertThat(response).isNotNull();
+        assertThat(response.results()).hasSize(3);
+
+        assertThat(response.results().get(0).status()).isEqualTo(OK.value());
+        assertThat(response.results().get(1).status()).isEqualTo(OK.value());
+        assertThat(response.results().get(2).status()).isEqualTo(NOT_FOUND.value());
+
+        var firstDeletedEmailEntity = emailRepository.findById(firstEmail.getId())
+                .orElseThrow();
+        assertThat(firstDeletedEmailEntity.getState()).isEqualTo(DELETED);
+
+        var secondDeletedEmailEntity = emailRepository.findById(secondEmail.getId())
+                .orElseThrow();
+        assertThat(secondDeletedEmailEntity.getState()).isEqualTo(DELETED);
     }
 
     private void assertCreatedEmail(

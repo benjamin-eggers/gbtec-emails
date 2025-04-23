@@ -17,4 +17,10 @@ public class RandomFactory {
     public static String randomText() {
         return FAKER.text().text();
     }
+
+    public static void main(String[] args) {
+        System.out.println(randomQuote());
+        System.out.println(randomText());
+    }
+
 }
