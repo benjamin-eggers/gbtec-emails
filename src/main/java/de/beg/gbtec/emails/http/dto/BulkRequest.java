@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record BulkRequest<S extends BulkRequestEntry<?>>(
-        @Size(max = 100) List<@Valid S> requests
+        @Size(max = 50) List<@Valid S> requests
 ) {
 
     public BulkRequest {
