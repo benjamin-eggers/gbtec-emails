@@ -1,11 +1,13 @@
 package de.beg.gbtec.emails.http.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import org.springframework.lang.Nullable;
 
 import static org.springframework.http.HttpStatus.*;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BulkResponseEntry<T>(
         int status,
         @Nullable Long id,
