@@ -90,7 +90,7 @@ public class EmailController {
     }
 
     @DeleteMapping("/bulk")
-    public ResponseEntity<BulkResponse<Long>> bulkDeleteEmails(
+    public ResponseEntity<BulkResponse<Void>> bulkDeleteEmails(
             @RequestBody @Valid BulkRequest<IdentifiedRequestEntry<Void>> request
     ) {
         var response = bulkRequestHandler.deleteEmailBulk(request);
