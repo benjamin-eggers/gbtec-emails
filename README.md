@@ -22,6 +22,3 @@ You can start the project by running the following command
 mvn spring-boot:run
 ```
 or just start the Spring Boot Application from the `de.beg.gbtec.emails.Application` file.
-
-## Outlook
-There 

@@ -160,8 +160,8 @@ class EmailConverterTest {
         // Then
         assertThat(entity.getFrom()).isNull();
         assertThat(entity.getTo()).hasSize(1);
-        assertThat(entity.getCc()).isEmpty();
-        assertThat(entity.getBcc()).isEmpty();
+        assertThat(entity.getCc()).isNull();
+        assertThat(entity.getBcc()).isNull();
         assertThat(entity.getSubject()).isNull();
         assertThat(entity.getBody()).isNull();
         assertThat(entity.getState()).isEqualTo(EmailStatus.DRAFT);
@@ -290,8 +290,8 @@ class EmailConverterTest {
         // Then
         assertThat(entity.getFrom()).isNull();
         assertThat(entity.getTo()).hasSize(1);
-        assertThat(entity.getCc()).isEmpty();
-        assertThat(entity.getBcc()).isEmpty();
+        assertThat(entity.getCc()).isNull();
+        assertThat(entity.getBcc()).isNull();
         assertThat(entity.getSubject()).isNull();
         assertThat(entity.getBody()).isNull();
         assertThat(entity.getState()).isEqualTo(EmailStatus.SENT);
