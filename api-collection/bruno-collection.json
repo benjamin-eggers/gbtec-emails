@@ -1,0 +1,264 @@
+{
+  "name": "GBTEC Email Server",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Paged Emails",
+      "filename": "Paged Emails.bru",
+      "seq": 2,
+      "request": {
+        "url": "http://localhost:8080/emails?page=0&size=10",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "page",
+            "value": "0",
+            "type": "query",
+            "enabled": true
+          },
+          {
+            "name": "size",
+            "value": "10",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Email by Id",
+      "filename": "Email by Id.bru",
+      "seq": 1,
+      "request": {
+        "url": "http://localhost:8080/emails/:id",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "id",
+            "value": "1",
+            "type": "path",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Create Email",
+      "filename": "Create Email.bru",
+      "seq": 3,
+      "request": {
+        "url": "http://localhost:8080/emails",
+        "method": "POST",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"emailFrom\": \"sender@example.com\",\n  \"emailTo\": [\n    {\n      \"email\": \"to@example.com\"\n    }\n  ],\n  \"emailCc\": [\n    {\n      \"email\": \"cc@example.com\"\n    }\n  ],\n  \"emailBcc\": [\n    {\n      \"email\": \"bcc@example.com\"\n    }\n  ],\n  \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n  \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n  \"state\": \"DRAFT\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Update Email by Id",
+      "filename": "Update Email by Id.bru",
+      "seq": 4,
+      "request": {
+        "url": "http://localhost:8080/emails/:id",
+        "method": "PUT",
+        "headers": [],
+        "params": [
+          {
+            "name": "id",
+            "value": "1",
+            "type": "path",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"emailFrom\": \"sender@example.com\",\n  \"emailTo\": [\n    {\n      \"email\": \"to@example.com\"\n    }\n  ],\n  \"emailCc\": [\n    {\n      \"email\": \"cc@example.com\"\n    }\n  ],\n  \"emailBcc\": [\n    {\n      \"email\": \"bcc@example.com\"\n    }\n  ],\n  \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n  \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n  \"state\": \"DRAFT\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Delete Email by Id",
+      "filename": "Delete Email by Id.bru",
+      "seq": 5,
+      "request": {
+        "url": "http://localhost:8080/emails/:id",
+        "method": "DELETE",
+        "headers": [],
+        "params": [
+          {
+            "name": "id",
+            "value": "1",
+            "type": "path",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "json": "{\n  \"emailFrom\": \"sender@example.com\",\n  \"emailTo\": [\n    {\n      \"email\": \"to@example.com\"\n    }\n  ],\n  \"emailCc\": [\n    {\n      \"email\": \"cc@example.com\"\n    }\n  ],\n  \"emailBcc\": [\n    {\n      \"email\": \"bcc@example.com\"\n    }\n  ],\n  \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n  \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n  \"state\": \"DRAFT\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Bulk Delete Email",
+      "filename": "Bulk Delete Email.bru",
+      "seq": 8,
+      "request": {
+        "url": "http://localhost:8080/emails/bulk",
+        "method": "DELETE",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"requests\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"id\": 2\n    }\n  ]\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Bulk Update Email",
+      "filename": "Bulk Update Email.bru",
+      "seq": 7,
+      "request": {
+        "url": "http://localhost:8080/emails/bulk",
+        "method": "PUT",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"emailFrom\": \"sender@example.com\",\n  \"emailTo\": [\n    {\n      \"email\": \"to@example.com\"\n    }\n  ],\n  \"emailCc\": [\n    {\n      \"email\": \"cc@example.com\"\n    }\n  ],\n  \"emailBcc\": [\n    {\n      \"email\": \"bcc@example.com\"\n    }\n  ],\n  \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n  \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n  \"state\": \"DRAFT\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Bulk Create Email",
+      "filename": "Bulk Create Email.bru",
+      "seq": 6,
+      "request": {
+        "url": "http://localhost:8080/emails/bulk",
+        "method": "POST",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"requests\": [\n    {\n      \"data\": {\n        \"emailFrom\": \"sender@example.com\",\n        \"emailTo\": [\n          {\n            \"email\": \"to@example.com\"\n          }\n        ],\n        \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n        \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n        \"state\": \"DRAFT\"\n      }\n    },\n    {\n      \"data\": {\n        \"emailFrom\": \"sender@example.com\",\n        \"emailTo\": [\n          {\n            \"email\": \"to@example.com\"\n          }\n        ],\n        \"emailSubject\": \"Lorem ipsum dolor sit amet\",\n        \"emailBody\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet\",\n        \"state\": \"DRAFT\"\n      }\n    }\n  ]\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    }
+  ],
+  "environments": [],
+  "brunoConfig": {
+    "version": "1",
+    "name": "GBTEC Email Server",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}
