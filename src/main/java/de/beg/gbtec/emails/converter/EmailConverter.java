@@ -56,9 +56,15 @@ public class EmailConverter {
     ) {
         var entity = new EmailEntity();
         entity.setFrom(trimToNull(request.from()));
-        entity.setTo(unwrapRecipients(request.to()));
-        entity.setCc(unwrapRecipients(request.cc()));
-        entity.setBcc(unwrapRecipients(request.bcc()));
+        entity.setTo(
+                emptyToNull(unwrapRecipients(request.to()))
+        );
+        entity.setCc(
+                emptyToNull(unwrapRecipients(request.cc()))
+        );
+        entity.setBcc(
+                emptyToNull(unwrapRecipients(request.bcc()))
+        );
         entity.setSubject(trimToNull(request.subject()));
         entity.setBody(trimToNull(request.body()));
         entity.setState(request.state());
@@ -80,11 +86,21 @@ public class EmailConverter {
             UpdateEmailRequest request
     ) {
         entity.setFrom(trimToNull(request.from()));
-        entity.setTo(unwrapRecipients(request.to()));
-        entity.setCc(unwrapRecipients(request.cc()));
-        entity.setBcc(unwrapRecipients(request.bcc()));
+        entity.setTo(
+                emptyToNull(unwrapRecipients(request.to()))
+        );
+        entity.setCc(
+                emptyToNull(unwrapRecipients(request.cc()))
+        );
+        entity.setBcc(
+                emptyToNull(unwrapRecipients(request.bcc()))
+        );
         entity.setSubject(trimToNull(request.subject()));
         entity.setBody(trimToNull(request.body()));
         entity.setState(request.state());
+    }
+
+    private static List<String> emptyToNull(List<String> recipients) {
+        return recipients.isEmpty() ? null : recipients;
     }
 }
